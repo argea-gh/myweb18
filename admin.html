@@ -3,13 +3,14 @@
     // ──────────────────────────────────────────
     // 🔐 KEAMANAN ADMIN (inline)
     // ──────────────────────────────────────────
+  (function() {
     const ADMIN_PASSWORD = 'herba2026';
     const ACCESS_KEY = 'herbaprima_admin_token';
-
+    
     function isAuthenticated() {
+      const token = localStorage.getItem(ACCESS_KEY);
+      if (!token) return false;
       try {
-        const token = localStorageACCESS_KEY);
-        if (!token) return false;
         const { pass, exp } = JSON.parse(token);
         return pass === ADMIN_PASSWORD && Date.now() < exp;
       } catch (e) {
@@ -22,15 +23,27 @@
       localStorage.setItem(ACCESS_KEY, JSON.stringify({ pass: ADMIN_PASSWORD, exp: expires }));
     }
 
-    if (!isAuthenticated()) {
-      const pass = prompt("🔒 Panel Admin Herbaprima\n\nMasukkan password:");
-      if (pass !== ADMIN_PASSWORD) {
-        alert("❌ Password salah!");
-        window.location.href = "index.html";
-        return;
+    function requireAuth() {
+      if (!isAuthenticated()) {
+        const pass = prompt("🔒 Panel Admin Herbaprima\n\nMasukkan password:");
+        if (pass === ADMIN_PASSWORD) {
+          grantAccess();
+        } else {
+          alert("❌ Password salah! Mengalihkan ke website utama...");
+          window.location.href = "index.html";
+          return false;
+        }
       }
-      grantAccess();
+      return true;
     }
+
+    // Jalankan setelah DOM siap
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', requireAuth);
+    } else {
+      requireAuth();
+    }
+  })(); // ← Pastikan ada dua tanda kurung: )()
 
     // ──────────────────────────────────────────
     // DOM Elements
