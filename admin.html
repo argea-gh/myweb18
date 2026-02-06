@@ -7,22 +7,29 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
+    :root {
+      --green-primary: #2e7d32;
+      --green-dark: #1b5e20;
+      --white: #ffffff;
+      --gray-bg: #f9fafb;
+      --text-dark: #1f2937;
+    }
     body {
       font-family: 'Poppins', sans-serif;
-      background: #f9fafb;
-      padding: 20px;
+      background-color: var(--gray-bg);
       margin: 0;
+      padding: 20px;
     }
     .container {
       max-width: 1200px;
       margin: 0 auto;
     }
     h1 {
-      color: #2e7d32;
+      color: var(--green-dark);
       margin-bottom: 20px;
     }
     form {
-      background: white;
+      background: var(--white);
       padding: 20px;
       border-radius: 12px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
@@ -37,14 +44,14 @@
       font-family: inherit;
     }
     button.btn {
-      background: #2e7d32;
-      color: white;
+      background: var(--green-primary);
+      color: var(--white);
       cursor: pointer;
     }
     table {
       width: 100%;
       border-collapse: collapse;
-      background: white;
+      background: var(--white);
       border-radius: 12px;
       overflow: hidden;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
@@ -57,6 +64,11 @@
     img {
       height: 50px;
       object-fit: contain;
+    }
+    .actions button {
+      margin-right: 8px;
+      padding: 6px 12px;
+      font-size: 0.9rem;
     }
   </style>
 </head>
@@ -74,6 +86,8 @@
         <option value="Minuman Sehat">Minuman Sehat</option>
         <option value="Minyak Herba">Minyak Herba</option>
         <option value="Aneka Herbal">Aneka Herbal</option>
+        <option value="Perawatan Kulit">Perawatan Kulit</option>
+        <option value="Perawatan Pribadi">Perawatan Pribadi</option>
       </select>
       <input type="number" id="productPrice" placeholder="Harga (tanpa titik)" min="1000" required />
       <input type="url" id="productImage" placeholder="URL Gambar" required />
@@ -102,141 +116,6 @@
     </table>
   </div>
 
-  <script>
-    // ──────────────────────────────────────────
-    // 🔐 KEAMANAN ADMIN
-    // ──────────────────────────────────────────
-    const ADMIN_PASSWORD = 'herba2026';
-    const ACCESS_KEY = 'herbaprima_admin_token';
-
-    function isAuthenticated() {
-      try {
-        const token = localStorage.getItem(ACCESS_KEY);
-        if (!token) return false;
-        const { pass, exp } = JSON.parse(token);
-        return pass === ADMIN_PASSWORD && Date.now() < exp;
-      } catch (e) {
-        return false;
-      }
-    }
-
-    function grantAccess() {
-      const expires = Date.now() + 24 * 60 * 60 * 1000;
-      localStorage.setItem(ACCESS_KEY, JSON.stringify({ pass: ADMIN_PASSWORD, exp: expires }));
-    }
-
-    // Jalankan autentikasi
-    if (!isAuthenticated()) {
-      const pass = prompt("🔒 Panel Admin Herbaprima\n\nMasukkan password:");
-      if (pass !== ADMIN_PASSWORD) {
-        alert("❌ Password salah!");
-        window.location.href = "index.html";
-      } else {
-        grantAccess();
-      }
-    }
-
-    // ──────────────────────────────────────────
-    // LOGIKA ADMIN SETELAH AUTENTIKASI
-    // ──────────────────────────────────────────
-    document.addEventListener('DOMContentLoaded', () => {
-      const form = document.getElementById('productForm');
-      const productIdInput = document.getElementById('productId');
-      const nameInput = document.getElementById('productName');
-      const categoryInput = document.getElementById('productCategory');
-      const priceInput = document.getElementById('productPrice');
-      const imageInput = document.getElementById('productImage');
-      const descInput = document.getElementById('productDesc');
-      const benefitsInput = document.getElementById('productBenefits');
-      const compositionInput = document.getElementById('productComposition');
-      const productTableBody = document.getElementById('productTableBody');
-      const productCount = document.getElementById('productCount');
-
-      let products = JSON.parse(localStorage.getItem('herbaprimaProducts')) || [];
-
-      function renderProductTable() {
-        productTableBody.innerHTML = '';
-        productCount.textContent = products.length;
-
-        products.forEach((p, i) => {
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td><img src="${p.image}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/60?text=No+Image'" /></td>
-            <td><strong>${p.name}</strong></td>
-            <td>${p.category}</td>
-            <td>Rp ${p.price.toLocaleString('id-ID')}</td>
-            <td>
-              <button class="btn btn-sm" onclick="editProduct(${i})" style="background:#1976d2;">Edit</button>
-              <button class="btn btn-sm" onclick="deleteProduct(${i})" style="background:#d32f2f;">Hapus</button>
-            </td>
-          `;
-          productTableBody.appendChild(row);
-        });
-      }
-
-      window.editProduct = function(i) {
-        const p = products[i];
-        productIdInput.value = i;
-        nameInput.value = p.name;
-        categoryInput.value = p.category;
-        priceInput.value = p.price;
-        imageInput.value = p.image;
-        descInput.value = p.description || '';
-        benefitsInput.value = p.benefits ? p.benefits.join(', ') : '';
-        compositionInput.value = p.composition || '';
-      };
-
-      window.deleteProduct = function(i) {
-        if (confirm(`Hapus "${products[i].name}"?`)) {
-          products.splice(i, 1);
-          saveProducts();
-          renderProductTable();
-        }
-      };
-
-      function saveProducts() {
-        localStorage.setItem('herbaprimaProducts', JSON.stringify(products));
-      }
-
-      form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const product = {
-          id: nameInput.value.trim().toLowerCase().replace(/\s+/g, '-'),
-          name: nameInput.value.trim(),
-          category: categoryInput.value,
-          price: parseInt(priceInput.value),
-          image: imageInput.value.trim(),
-          description: descInput.value.trim(),
-          benefits: benefitsInput.value.split(',').map(b => b.trim()).filter(b => b),
-          composition: compositionInput.value.trim()
-        };
-
-        const idx = productIdInput.value;
-        if (idx !== '') {
-          products[idx] = product;
-        } else {
-          products.push(product);
-        }
-
-        saveProducts();
-        renderProductTable();
-        form.reset();
-        productIdInput.value = '';
-        alert('✅ Produk berhasil disimpan!');
-      });
-
-      document.getElementById('btnReset').addEventListener('click', () => {
-        productIdInput.value = '';
-      });
-
-      renderProductTable();
-    });
-    
-    // Saat simpan produk
-if (!name || !image || !category || price < 1000) {
-  alert('⚠️ Nama, gambar, kategori, dan harga wajib diisi!');
-  return;
-}
-  </script>
+  <script src="assets/js/admin.js"></script>
 </body>
 </html>
