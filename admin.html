@@ -1,16 +1,118 @@
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin — Herbaprima</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f9fafb;
+      padding: 20px;
+      margin: 0;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    h1 {
+      color: #2e7d32;
+      margin-bottom: 20px;
+    }
+    form {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin-bottom: 30px;
+    }
+    input, select, textarea, button {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-family: inherit;
+    }
+    button.btn {
+      background: #2e7d32;
+      color: white;
+      cursor: pointer;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+    img {
+      height: 50px;
+      object-fit: contain;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔐 Admin Panel — Herbaprima</h1>
+
+    <!-- Form Produk -->
+    <form id="productForm">
+      <input type="hidden" id="productId" />
+      <input type="text" id="productName" placeholder="Nama Produk" required />
+      <select id="productCategory" required>
+        <option value="">Pilih Kategori</option>
+        <option value="Madu Premium">Madu Premium</option>
+        <option value="Minuman Sehat">Minuman Sehat</option>
+        <option value="Minyak Herba">Minyak Herba</option>
+        <option value="Aneka Herbal">Aneka Herbal</option>
+      </select>
+      <input type="number" id="productPrice" placeholder="Harga (tanpa titik)" min="1000" required />
+      <input type="url" id="productImage" placeholder="URL Gambar" required />
+      <textarea id="productDesc" placeholder="Deskripsi"></textarea>
+      <textarea id="productBenefits" placeholder="Manfaat (pisahkan dengan koma)"></textarea>
+      <textarea id="productComposition" placeholder="Komposisi"></textarea>
+      <button type="submit" class="btn">Simpan Produk</button>
+      <button type="reset" id="btnReset" class="btn" style="background:#6b7280;">Reset</button>
+    </form>
+
+    <!-- Tabel Produk -->
+    <h2>Daftar Produk (<span id="productCount">0</span>)</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Gambar</th>
+          <th>Nama</th>
+          <th>Kategori</th>
+          <th>Harga</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="productTableBody">
+        <!-- Diisi oleh JS -->
+      </tbody>
+    </table>
+  </div>
+
+  <script>
     // ──────────────────────────────────────────
-    // 🔐 KEAMANAN ADMIN (inline)
+    // 🔐 KEAMANAN ADMIN
     // ──────────────────────────────────────────
-  (function() {
     const ADMIN_PASSWORD = 'herba2026';
     const ACCESS_KEY = 'herbaprima_admin_token';
-    
+
     function isAuthenticated() {
-      const token = localStorage.getItem(ACCESS_KEY);
-      if (!token) return false;
       try {
+        const token = localStorage.getItem(ACCESS_KEY);
+        if (!token) return false;
         const { pass, exp } = JSON.parse(token);
         return pass === ADMIN_PASSWORD && Date.now() < exp;
       } catch (e) {
@@ -23,162 +125,112 @@
       localStorage.setItem(ACCESS_KEY, JSON.stringify({ pass: ADMIN_PASSWORD, exp: expires }));
     }
 
-    function requireAuth() {
-      if (!isAuthenticated()) {
-        const pass = prompt("🔒 Panel Admin Herbaprima\n\nMasukkan password:");
-        if (pass === ADMIN_PASSWORD) {
-          grantAccess();
-        } else {
-          alert("❌ Password salah! Mengalihkan ke website utama...");
-          window.location.href = "index.html";
-          return false;
-        }
+    // Jalankan autentikasi
+    if (!isAuthenticated()) {
+      const pass = prompt("🔒 Panel Admin Herbaprima\n\nMasukkan password:");
+      if (pass !== ADMIN_PASSWORD) {
+        alert("❌ Password salah!");
+        window.location.href = "index.html";
+      } else {
+        grantAccess();
       }
-      return true;
-    }
-
-    // Jalankan setelah DOM siap
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', requireAuth);
-    } else {
-      requireAuth();
-    }
-  })(); // ← Pastikan ada dua tanda kurung: )()
-
-    // ──────────────────────────────────────────
-    // DOM Elements
-    // ──────────────────────────────────────────
-    const form = document.getElementById('productForm');
-    const productIdInput = document.getElementById('productId');
-    const nameInput = document.getElementById('productName');
-    const categoryInput = document.getElementById('productCategory');
-    const priceInput = document.getElementById('productPrice');
-    const imageInput = document.getElementById('productImage');
-    const descInput = document.getElementById('productDesc');
-    const benefitsInput = document.getElementById('productBenefits');
-    const compositionInput = document.getElementById('productComposition');
-    const productTableBody = document.getElementById('productTableBody');
-    const productCount = document.getElementById('productCount');
-
-    if (!form || !productTableBody) {
-      console.error("❌ Elemen admin tidak ditemukan. Periksa HTML.");
-      return;
     }
 
     // ──────────────────────────────────────────
-    // Load produk
+    // LOGIKA ADMIN SETELAH AUTENTIKASI
     // ──────────────────────────────────────────
-    let products = JSON.parse(localStorage.getItem('herbaprimaProducts')) || [];
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('productForm');
+      const productIdInput = document.getElementById('productId');
+      const nameInput = document.getElementById('productName');
+      const categoryInput = document.getElementById('productCategory');
+      const priceInput = document.getElementById('productPrice');
+      const imageInput = document.getElementById('productImage');
+      const descInput = document.getElementById('productDesc');
+      const benefitsInput = document.getElementById('productBenefits');
+      const compositionInput = document.getElementById('productComposition');
+      const productTableBody = document.getElementById('productTableBody');
+      const productCount = document.getElementById('productCount');
 
-    // ──────────────────────────────────────────
-    // Render Table
-    // ──────────────────────────────────────────
-    function renderProductTable() {
-      productTableBody.innerHTML = '';
-      productCount.textContent = products.length;
+      let products = JSON.parse(localStorage.getItem('herbaprimaProducts')) || [];
 
-      products.forEach((p, i) => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td><img src="${p.image}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/60?text=No+Image'" /></td>
-          <td><strong>${p.name}</strong></td>
-          <td>${p.category}</td>
-          <td>Rp ${p.price.toLocaleString('id-ID')}</td>
-          <td>
-            <button class="btn btn-sm btn-edit" data-index="${i}">Edit</button>
-            <button class="btn btn-sm btn-delete" data-index="${i}">Hapus</button>
-          </td>
-        `;
-        productTableBody.appendChild(row);
-      });
+      function renderProductTable() {
+        productTableBody.innerHTML = '';
+        productCount.textContent = products.length;
 
-      // Event edit/hapus
-      document.querySelectorAll('.btn-edit').forEach(btn => {
-        btn.addEventListener('click', e => {
-          const i = e.target.dataset.index;
-          fillForm(products[i], i);
+        products.forEach((p, i) => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td><img src="${p.image}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/60?text=No+Image'" /></td>
+            <td><strong>${p.name}</strong></td>
+            <td>${p.category}</td>
+            <td>Rp ${p.price.toLocaleString('id-ID')}</td>
+            <td>
+              <button class="btn btn-sm" onclick="editProduct(${i})" style="background:#1976d2;">Edit</button>
+              <button class="btn btn-sm" onclick="deleteProduct(${i})" style="background:#d32f2f;">Hapus</button>
+            </td>
+          `;
+          productTableBody.appendChild(row);
         });
-      });
-      document.querySelectorAll('.btn-delete').forEach(btn => {
-        btn.addEventListener('click', e => {
-          const i = e.target.dataset.index;
-          if (confirm(`Hapus "${products[i].name}"?`)) {
-            products.splice(i, 1);
-            saveProducts();
-            renderProductTable();
-          }
-        });
-      });
-    }
-
-    function fillForm(p, i = null) {
-      productIdInput.value = i ?? '';
-      nameInput.value = p.name || '';
-      categoryInput.value = p.category || '';
-      priceInput.value = p.price || '';
-      imageInput.value = p.image || '';
-      descInput.value = p.description || '';
-      benefitsInput.value = p.benefits?.join(', ') || '';
-      compositionInput.value = p.composition || '';
-    }
-
-    function saveProducts() {
-      try {
-        localStorage.setItem('herbaprimaProducts', JSON.stringify(products));
-        console.log('✅ Disimpan:', products);
-      } catch (e) {
-        console.error('❌ Gagal simpan:', e);
-      }
-    }
-
-    // ──────────────────────────────────────────
-    // Submit Form
-    // ──────────────────────────────────────────
-    form.addEventListener('submit', e => {
-      e.preventDefault();
-
-      const name = nameInput.value.trim();
-      const cat = categoryInput.value;
-      const price = parseInt(priceInput.value);
-      const img = imageInput.value.trim();
-
-      if (!name || !cat || !price || !img) {
-        alert('⚠️ Isi semua field!');
-        return;
-      }
-      if (price < 1000) {
-        alert('⚠️ Harga minimal Rp 1.000');
-        return;
       }
 
-      const product = {
-        id: name.toLowerCase().replace(/\s+/g, '-'),
-        name,
-        category: cat,
-        price,
-        image: img,
-        description: descInput.value.trim(),
-        benefits: benefitsInput.value.split(',').map(b => b.trim()).filter(b => b),
-        composition: compositionInput.value.trim()
+      window.editProduct = function(i) {
+        const p = products[i];
+        productIdInput.value = i;
+        nameInput.value = p.name;
+        categoryInput.value = p.category;
+        priceInput.value = p.price;
+        imageInput.value = p.image;
+        descInput.value = p.description || '';
+        benefitsInput.value = p.benefits ? p.benefits.join(', ') : '';
+        compositionInput.value = p.composition || '';
       };
 
-      const idx = productIdInput.value;
-      if (idx !== '') {
-        products[idx] = product;
-      } else {
-        products.push(product);
+      window.deleteProduct = function(i) {
+        if (confirm(`Hapus "${products[i].name}"?`)) {
+          products.splice(i, 1);
+          saveProducts();
+          renderProductTable();
+        }
+      };
+
+      function saveProducts() {
+        localStorage.setItem('herbaprimaProducts', JSON.stringify(products));
       }
 
-      saveProducts();
-      renderProductTable();
-      form.reset();
-      productIdInput.value = '';
-      alert('✅ Produk berhasil disimpan!');
-    });
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const product = {
+          id: nameInput.value.trim().toLowerCase().replace(/\s+/g, '-'),
+          name: nameInput.value.trim(),
+          category: categoryInput.value,
+          price: parseInt(priceInput.value),
+          image: imageInput.value.trim(),
+          description: descInput.value.trim(),
+          benefits: benefitsInput.value.split(',').map(b => b.trim()).filter(b => b),
+          composition: compositionInput.value.trim()
+        };
 
-    // ──────────────────────────────────────────
-    // Inisialisasi
-    // ──────────────────────────────────────────
-    renderProductTable();
-  });
-</script>
+        const idx = productIdInput.value;
+        if (idx !== '') {
+          products[idx] = product;
+        } else {
+          products.push(product);
+        }
+
+        saveProducts();
+        renderProductTable();
+        form.reset();
+        productIdInput.value = '';
+        alert('✅ Produk berhasil disimpan!');
+      });
+
+      document.getElementById('btnReset').addEventListener('click', () => {
+        productIdInput.value = '';
+      });
+
+      renderProductTable();
+    });
+  </script>
+</body>
+</html>
