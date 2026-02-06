@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Artikel Edukasi - Herbaprima</title>
+  
+  <!-- Ambil ID dari URL, tampilkan artikel + produk terkait -->
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f9f9f9;
+      color: #333;
+      line-height: 1.6;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    h1 {
+      color: #2E7D32;
+      margin-bottom: 16px;
+    }
+    .article-meta {
+      color: #777;
+      font-size: 0.9em;
+      margin-bottom: 24px;
+    }
+    .article-image {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      margin: 16px 0;
+    }
+    .product-grid {
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid #eee;
+    }
+    .product-grid h2 {
+      color: #2E7D32;
+      margin-bottom: 16px;
+    }
+    .product-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .product-card {
+      flex: 1 1 200px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+    }
+    .product-card img {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+    .product-card h3 {
+      font-size: 1em;
+      margin: 8px 0;
+    }
+    .product-card p {
+      color: #2E7D32;
+      font-weight: bold;
+      margin: 4px 0;
+    }
+    .btn-wa {
+      background: #25D366;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: bold;
+      display: inline-block;
+      margin-top: 6px;
+    }
+    .not-found {
+      text-align: center;
+      padding: 40px;
+      color: #888;
+    }
+    .back-link {
+      display: inline-block;
+      margin-top: 24px;
+      color: #2E7D32;
+      text-decoration: none;
+    }
+    .back-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="articleContent">
+      <!-- Konten artikel akan dimuat di sini -->
+    </div>
+  </div>
+
+  <script>
+    // Fungsi format Rupiah (redundansi kecil untuk kemandirian)
+    function formatRupiah(num) {
+      if (typeof num === 'string') num = parseInt(num);
+      if (isNaN(num)) return 'Rp 0';
+      return 'Rp ' + num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const id = urlParams.get('id');
+
+      if (!id) {
+        document.getElementById('articleContent').innerHTML = `
+          <div class="not-found">
+            <h2>❌ Artikel Tidak Ditemukan</h2>
+            <p>ID artikel tidak valid.</p>
+            <a href="index.html" class="back-link">← Kembali ke Daftar</a>
+          </div>
+        `;
+        return;
+      }
+
+      // Ambil data artikel
+      const articles = JSON.parse(localStorage.getItem('herbaprima_education_articles') || '[]');
+      const article = articles.find(a => a.id == id);
+
+      if (!article) {
+        document.getElementById('articleContent').innerHTML = `
+          <div class="not-found">
+            <h2>🔍 Artikel Tidak Ditemukan</h2>
+            <p>Artikel dengan ID ${id} tidak tersedia.</p>
+            <a href="index.html" class="back-link">← Kembali ke Daftar</a>
+          </div>
+        `;
+        return;
+      }
+
+      // Ambil produk (jika ada)
+      const allProducts = JSON.parse(localStorage.getItem('herbaprima_products') || '[]');
+      const relatedProducts = allProducts.filter(p => 
+        article.relatedProducts && article.relatedProducts.includes(p.id.toString())
+      );
+
+      // Render gambar (jika ada)
+      const imgTag = article.image 
+        ? `<img src="${article.image}" alt="Ilustrasi" class="article-image">`
+        : '';
+
+      // Render produk terkait
+      let productsHtml = '';
+      if (relatedProducts.length > 0) {
+        productsHtml = `
+          <div class="product-grid">
+            <h2>.Produk Terkait</h2>
+            <div class="product-list">
+              ${relatedProducts.map(p => `
+                <div class="product-card">
+                  <img src="${p.image || ''}" alt="${p.name}" onerror="this.style.display='none'">
+                  <h3>${p.name}</h3>
+                  <p>${formatRupiah(p.price)}</p>
+                  <a href="https://wa.me/6282241900467?text=Saya%20tertarik%20dengan%20${encodeURIComponent(p.name)}" 
+                     target="_blank" class="btn-wa">Beli via WhatsApp</a>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      // Render konten lengkap
+      document.getElementById('articleContent').innerHTML = `
+        <h1>${article.title}</h1>
+        <div class="article-meta">
+          Dipublikasikan: ${new Date(article.createdAt).toLocaleDateString('id-ID')}
+        </div>
+        ${imgTag}
+        <div class="article-body">
+          ${article.content.replace(/\n/g, '<br>')}
+        </div>
+        ${productsHtml}
+        <a href="index.html" class="back-link">← Kembali ke Daftar Artikel</a>
+      `;
+    });
+  </script>
+</body>
+</html>

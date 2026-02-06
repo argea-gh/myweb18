@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Edukasi Herbal - Herbaprima</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f9f9f9;
+      color: #333;
+      line-height: 1.6;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    h1 {
+      color: #2E7D32;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .article-item {
+      padding: 16px 0;
+      border-bottom: 1px solid #eee;
+    }
+    .article-item:last-child {
+      border-bottom: none;
+    }
+    .article-item h2 {
+      margin: 0 0 8px;
+    }
+    .article-item p {
+      color: #555;
+      margin: 0 0 12px;
+    }
+    .article-meta {
+      font-size: 0.85em;
+      color: #888;
+    }
+    .no-articles {
+      text-align: center;
+      color: #777;
+      padding: 40px 0;
+    }
+    a {
+      color: #2E7D32;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🌿 Artikel Edukasi Herbal</h1>
+    <div id="articles"></div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const container = document.getElementById('articles');
+      
+      // Ambil data dari localStorage
+      const articles = JSON.parse(localStorage.getItem('herbaprima_education_articles') || '[]');
+
+      if (articles.length === 0) {
+        container.innerHTML = '<div class="no-articles">Belum ada artikel edukasi.</div>';
+        return;
+      }
+
+      // Urutkan terbaru dulu
+      articles.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+      // Render daftar
+      container.innerHTML = articles.map(article => `
+        <div class="article-item">
+          <h2><a href="detail.html?id=${article.id}">${article.title}</a></h2>
+          ${article.summary ? `<p>${article.summary}</p>` : ''}
+          <div class="article-meta">
+            Dipublikasikan: ${new Date(article.createdAt).toLocaleDateString('id-ID')}
+          </div>
+        </div>
+      `).join('');
+    });
+  </script>
+</body>
+</html>

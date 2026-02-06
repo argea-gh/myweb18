@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Editor Artikel Edukasi - Herbaprima Admin</title>
+  <link rel="stylesheet" href="../assets/css/education-admin.css" />
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>📝 Editor Artikel Edukasi</h1>
+      <a href="index.html" class="btn btn-outline">← Kembali ke Daftar</a>
+    </header>
+
+    <form id="articleForm" class="editor-form">
+      <!-- Judul -->
+      <label for="title">Judul Artikel</label>
+      <input type="text" id="title" placeholder="Contoh: Manfaat Kunyit untuk Pencernaan" required />
+
+      <!-- Ringkasan -->
+      <label for="summary">Ringkasan Singkat</label>
+      <textarea id="summary" rows="2" placeholder="1–2 kalimat inti..."></textarea>
+
+      <!-- Gambar (URL) -->
+      <label for="image">URL Gambar Ilustrasi (opsional)</label>
+      <input type="url" id="image" placeholder="https://github.com/.../ilustrasi.jpg" />
+
+      <!-- Isi Artikel -->
+      <label for="content">Isi Artikel (Markdown ringan atau HTML sederhana)</label>
+      <textarea id="content" rows="12" placeholder="Tulis konten di sini..."></textarea>
+
+      <!-- Preview -->
+      <div class="preview-section">
+        <h3>👁️ Preview</h3>
+        <div id="preview" class="preview-content"></div>
+      </div>
+
+      <!-- Produk Terkait -->
+      <label>Produk Terkait</label>
+      <div id="productCheckboxes" class="checkbox-group">
+        <!-- Diisi otomatis via JS -->
+      </div>
+
+      <!-- Aksi -->
+      <div class="form-actions">
+        <button type="button" onclick="saveArticle()" class="btn btn-primary">💾 Simpan Artikel</button>
+        <button type="button" onclick="exportToHTML()" class="btn btn-secondary">📤 Ekspor ke HTML</button>
+        <button type="reset" class="btn btn-outline">↺ Reset</button>
+      </div>
+    </form>
+  </div>
+
+  <script src="../assets/js/utils.js"></script>
+  <script src="../assets/js/products.js"></script>
+  <script src="../assets/js/education-cms.js"></script>
+</body>
+</html>

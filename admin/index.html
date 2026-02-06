@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Artikel Edukasi - Herbaprima Admin</title>
+  <link rel="stylesheet" href="../assets/css/education-admin.css" />
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>📚 Artikel Edukasi Saya</h1>
+      <a href="editor.html" class="btn btn-primary">+ Buat Artikel Baru</a>
+    </header>
+
+    <main>
+      <div id="articleList" class="article-list">
+        <!-- Daftar artikel akan muncul di sini -->
+      </div>
+
+      <div id="emptyMessage" style="text-align: center; color: #777; padding: 40px;">
+        Belum ada artikel. <a href="editor.html">Buat sekarang?</a>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/js/utils.js"></script>
+  <script>
+    // Fungsi hapus artikel
+    function deleteArticle(id) {
+      if (!confirm('Yakin ingin menghapus artikel ini?')) return;
+
+      const articles = JSON.parse(localStorage.getItem('herbaprima_education_articles') || '[]');
+      const updated = articles.filter(a => a.id != id);
+      localStorage.setItem('herbaprima_education_articles', JSON.stringify(updated));
+      renderArticleList(); // refresh
+    }
+
+    // Fungsi edit artikel (sederhana: redirect ke editor dengan data)
+    function editArticle(id) {
+      alert('Fitur edit penuh memerlukan penyimpanan state.\nUntuk versi sederhana, Anda bisa buka artikel di editor dan salin kontennya.');
+      // Catatan: Edit penuh memerlukan form prefill — bisa dikembangkan nanti
+      window.location.href = 'editor.html';
+    }
+
+    // Render daftar artikel
+    function renderArticleList() {
+      const container = document.getElementById('articleList');
+      const emptyMsg = document.getElementById('emptyMessage');
+      const articles = JSON.parse(localStorage.getItem('herbaprima_education_articles') || '[]');
+
+      if (articles.length === 0) {
+        container.style.display = 'none';
+        emptyMsg.style.display = 'block';
+        return;
+      }
+
+      container.style.display = 'block';
+      emptyMsg.style.display = 'none';
+
+      container.innerHTML = articles.map(a => `
+        <div class="article-item">
+          <h3>${a.title}</h3>
+          ${a.summary ? `<p><em>${a.summary}</em></p>` : ''}
+          <div class="article-meta">
+            <small>Dibuat: ${new Date(a.createdAt).toLocaleDateString('id-ID')}</small>
+          </div>
+          <div class="article-actions">
+            <button onclick="editArticle(${a.id})" class="btn btn-outline">Edit</button>
+            <button onclick="deleteArticle(${a.id})" class="btn btn-danger">Hapus</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Muat saat halaman siap
+    document.addEventListener('DOMContentLoaded', () => {
+      renderArticleList();
+    });
+  </script>
+
+  <style>
+    .article-list {
+      display: grid;
+      gap: 20px;
+    }
+    .article-item {
+      border: 1px solid #eee;
+      border-radius: 10px;
+      padding: 16px;
+      background: #fafafa;
+    }
+    .article-meta {
+      margin: 10px 0;
+      color: #666;
+      font-size: 0.9em;
+    }
+    .article-actions {
+      margin-top: 12px;
+      display: flex;
+      gap: 8px;
+    }
+    .btn-danger {
+      background: #f44336;
+      color: white;
+    }
+    .btn-danger:hover {
+      background: #d32f2f;
+    }
+  </style>
+</body>
+</html>

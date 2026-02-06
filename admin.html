@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin — Herbaprima</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="stylesheet" href="assets/css/admin.css" />
+</head>
+<body>
+    <!-- ✅ KEAMANAN LANGSUNG DI HTML -->
+  <script>
+    (function() {
+      const pwd = 'herba2026'; // ✅ GANTI PASSWORD
+      const token = localStorage.getItem('herbaprima_admin');
+      const valid = token && token === pwd;
+      
+      if (!valid) {
+        const input = prompt('🔒 Password Admin:');
+        if (input === pwd) {
+          localStorage.setItem('herbaprima_admin', pwd);
+        } else {
+          alert('❌ Akses ditolak!');
+          window.location.href = 'index.html';
+        }
+      }
+    })();
+  </script>
+  
+  <!-- HEADER -->
+  <header class="header sticky">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">
+        <img src="https://lh3.googleusercontent.com/d/1xp5ce29F3f-nVa_IEx925L-8YrXXbHo6" alt="Herbaprima Logo" />
+        <span class="site-title">Herbaprima</span>
+      </a>
+      <h1 class="admin-title">Panel Admin — Kelola Produk</h1>
+      <a href="index.html" class="btn btn-outline">← Kembali ke Website</a>
+    </div>
+  </header>
+
+  <main class="admin-main">
+    <div class="container">
+      <!-- FORM PRODUK -->
+      <section class="admin-section">
+        <h2 id="form-title">➕ Tambah Produk Baru</h2>
+        <form id="productForm">
+          <input type="hidden" id="productId" />
+
+          <div class="form-group">
+            <label for="productName">Nama Produk *</label>
+            <input type="text" id="productName" required placeholder="Contoh: Madu Pahit" />
+          </div>
+
+          <div class="form-group">
+            <label for="productCategory">Kategori *</label>
+            <select id="productCategory" required>
+              <option value="">— Pilih Kategori —</option>
+              <option value="Minuman Sehat">Minuman Sehat</option>
+              <option value="Madu Premium">Madu Premium</option>
+              <option value="Minyak Herba">Minyak Herba</option>
+              <option value="Aneka Herbal">Aneka Herbal</option>
+              <option value="Perawatan Kulit">Perawatan Kulit</option>
+              <option value="Perawatan Pribadi">Perawatan Pribadi</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="productPrice">Harga (Rp) *</label>
+            <input type="number" id="productPrice" min="1000" required placeholder="Contoh: 120000" />
+          </div>
+
+          <div class="form-group">
+            <label for="productImage">URL Gambar *</label>
+            <input type="url" id="productImage" required 
+                   placeholder="https://contoh.com/produk.jpg" />
+            <small class="hint">✅ Pastikan link publik & diakhiri .png/.jpg</small>
+            <div class="image-preview" id="imagePreview">
+              <img id="previewImg" src="" alt="Preview" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="productDesc">Deskripsi</label>
+            <textarea id="productDesc" rows="3" placeholder="Deskripsi singkat produk..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Manfaat (pisahkan dengan koma)</label>
+            <input type="text" id="productBenefits" 
+                   placeholder="Contoh: Meningkatkan imunitas, Mengurangi lelah, dll" />
+          </div>
+
+          <div class="form-group">
+            <label for="productComposition">Komposisi</label>
+            <textarea id="productComposition" rows="2" 
+                      placeholder="Contoh: Madu murni, ekstrak habbatussauda, dll"></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-save"></i> Simpan Produk
+            </button>
+            <button type="button" id="btnReset" class="btn btn-secondary">
+              <i class="fas fa-redo"></i> Reset Form
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- DAFTAR PRODUK -->
+      <section class="admin-section">
+        <div class="section-header">
+          <h2>📦 Daftar Produk (Total: <span id="productCount">0</span>)</h2>
+          <button id="btnExport" class="btn btn-outline">
+            <i class="fas fa-file-export"></i> Ekspor JSON
+          </button>
+        </div>
+
+        <div class="admin-table-container">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Foto</th>
+                <th>Nama</th>
+                <th>Kategori</th>
+                <th>Harga</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="productTableBody">
+              <!-- Diisi oleh JS -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>🔒 Data disimpan lokal di browser Anda (localStorage). Tidak dikirim ke server.</p>
+      <p>© 2026 Herbaprima — Panel Admin Internal</p>
+    </div>
+  </footer>
+
+  <script src="assetsjs/products.js"></script>
+  <script src="assetsjs/admin.js"></script>
+</body>
+</html>
