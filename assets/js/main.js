@@ -75,26 +75,40 @@ function initHeader() {
 // ──────────────────────────────────────────
 
 function renderProducts(category = 'all') {
-  // Cek apakah elemen ada (hindari error di halaman selain produk/index)
   const grid = document.getElementById('productsGrid');
   if (!grid) return;
 
-  // Ambil produk dari localStorage atau default
-  let productList = JSON.parse(localStorage.getItem('herbaprimaProducts')) || products;
+  let productList = JSON.parse(localStorage.getItem('herbaprimaProducts')) || [];
 
+  // Filter produk
   const filtered = category === 'all' 
     ? productList 
     : productList.filter(p => p.category === category);
 
   grid.innerHTML = '';
+
   filtered.forEach(product => {
+    // ✅ Validasi minimal
+    if (!product.name || !product.image || product.price == null) return;
+
+    // ✅ Pastikan benefits array
+    const benefits = Array.isArray(product.benefits) 
+      ? product.benefits 
+      : (typeof product.benefits === 'string' 
+          ? product.benefits.split(',').map(b => b.trim()).filter(b => b) 
+          : []);
+
     const priceFormatted = formatRupiah(product.price);
     const card = document.createElement('div');
-    card.className = 'product-card stagger-item slide-up';
+    card.className = 'product-card stagger-item visible'; // langsung visible
+
     card.innerHTML = `
-      <img src="${product.image}" alt="${product.name}" data-id="${product.id}" onError="this.src='https://via.placeholder.com/260x180?text=No+Image'" />
+      <img src="${product.image}" 
+           alt="${product.name}" 
+           data-id="${product.id}" 
+           onerror="this.src='https://via.placeholder.com/260x180?text=No+Image'" />
       <div class="card-body">
-        <span class="category">${product.category}</span>
+        <span class="category">${product.category || '—'}</span>
         <h4>${product.name}</h4>
         <div class="price">${priceFormatted}</div>
         <button class="btn btn-outline btn-add" data-id="${product.id}">Pilih Produk</button>
@@ -103,7 +117,7 @@ function renderProducts(category = 'all') {
     grid.appendChild(card);
   });
 
-  // Event: Pilih Produk → modal
+  // Event listeners
   document.querySelectorAll('.btn-add').forEach(btn => {
     btn.addEventListener('click', (e) => {
       const id = e.target.dataset.id;
@@ -112,16 +126,15 @@ function renderProducts(category = 'all') {
     });
   });
 
-  // Event: Klik gambar → modal
   document.querySelectorAll('.product-card img').forEach(img => {
     img.addEventListener('click', (e) => {
-      const id = e.target.dataset.id || e.target.closest('.product-card').querySelector('button').dataset.id;
+      const id = e.target.dataset.id;
       const product = productList.find(p => p.id === id);
       if (product) openProductModal(product);
     });
   });
 
-// ✅ ANIMASI LANGSUNG SETELAH KLIK KATEGORI
+  // ✅ ANIMASI LANGSUNG SETELAH KLIK KATEGORI
   // Gunakan requestAnimationFrame + delay kecil untuk DOM update
   requestAnimationFrame(() => {
     setTimeout(animateNewProducts, 50);
