@@ -231,6 +231,12 @@
 
       renderProductTable();
     });
+    
+    // Saat simpan produk
+if (!name || !image || !category || price < 1000) {
+  alert('⚠️ Nama, gambar, kategori, dan harga wajib diisi!');
+  return;
+}
   </script>
 </body>
 </html>
